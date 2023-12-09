@@ -1,0 +1,74 @@
+/* Prgramming Project 2, Chapter 12
+ * (a) Write a program that reads a message, then checks whether it's a palindrome 
+ * 	(the letters in the message are the same from left to right as from right to left) :
+ *	
+ *	Enter a message: "He lived as a devil, eh?
+ *	Palindrome
+ *
+ *	Enter a message: "Madam, I am Adam."
+ *	Not a palindrome
+ *
+ *	Ignore all characters that aren't letters. Use integer variables to keep track of positions in the array.
+ *
+ * (b) Revise the program to use pointers instead of integers to keep track of positions in the array.
+ */
+
+#include <stdio.h>
+#define N 10
+#define CASE ' '
+
+int is_palindrome(char str[]);
+void print_bool(int bool_value);
+
+int main(void) {
+	char str[] = "he lived as a devil, eh?", str2[] = "Madam, I am Adam.", str3[] = "Racecar racecaR";
+	int str_palindrome = is_palindrome(str), str2_palindrome = is_palindrome(str2), str3_palindrome = is_palindrome(str3);
+	print_bool(str_palindrome);
+	printf("\n");
+	print_bool(str2_palindrome);
+	printf("\n");
+	print_bool(str3_palindrome);
+
+	return 0;
+}
+
+int is_palindrome(char str[]) {
+	char *p, *q, *r; // pointer p to be set initially to str[0]
+	p = str;
+	q = p;
+
+	int size = 0; // str.length
+
+	while(*q != 0) {
+		q++;
+		size++;
+	} // computes str.length
+
+	for( ; p < str + size; p++) {
+		if(*p >= 65 && *p <= 90) *p += CASE; // converts *p = a[p] to lowercase if *p is an uppercase char
+	}
+
+	p = str; // resets p to str[0]
+	r = str + size; // equivalent to str[size]; valid in the case of pointers
+
+	while(p < r) {
+		if(*p < 97 || *p > 122) {
+			p++;
+		} 
+		else if(*r < 97 || *r > 122) {
+			r--;
+		} // skips comparison if *p or *r is not a character
+		if(*p != *r) {
+			return 0;
+		}
+		p++;
+		r--;
+	}
+
+	return 1;
+}
+
+void print_bool(int bool_value) {
+	if(bool_value == 1) printf("true");
+	else if(bool_value == 0) printf("false");
+}
