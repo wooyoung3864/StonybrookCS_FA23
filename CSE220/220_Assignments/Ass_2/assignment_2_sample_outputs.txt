@@ -1,0 +1,109 @@
+1. ./A2P1
+Enter a 5-digit number: 54345
+5 4 3 4 5
+Is the number a palindrome? true
+
+2. ./A2P2
+Enter product number and quantity sold in the day: 45900
+Total value of items sold in the day: 2360000 won.
+
+3. ./A2P3
+Enter exponent x and error tolerance epsilon to approximate e^x: 3 0.007
+Approximation of e^3 up to epsilon: 20.084105
+
+4. ./A2P4
+Enter an integer N to list all Pythagorean triangles where sum of all three sides is < N: 50
+List of all Pythagorean triangles where sum of all three sides is < N:
+ <3, 4, 5>
+<6, 8, 10>
+<5, 12, 13>
+<9, 12, 15>
+<8, 15, 17>
+<12, 16, 20>
+
+5. ./A2P5
+Enter any number N less than 256: 17
+Decimal: 001
+Binary: 00000001
+Octal: 001
+Hexadecimal: 001
+
+Decimal: 002
+Binary: 00000010
+Octal: 002
+Hexadecimal: 002
+
+Decimal: 003
+Binary: 00000011
+Octal: 003
+Hexadecimal: 003
+
+Decimal: 004
+Binary: 00000100
+Octal: 004
+Hexadecimal: 004
+
+Decimal: 005
+Binary: 00000101
+Octal: 005
+Hexadecimal: 005
+
+Decimal: 006
+Binary: 00000110
+Octal: 006
+Hexadecimal: 006
+
+Decimal: 007
+Binary: 00000111
+Octal: 007
+Hexadecimal: 007
+
+Decimal: 008
+Binary: 00001000
+Octal: 010
+Hexadecimal: 008
+
+Decimal: 009
+Binary: 00001001
+Octal: 011
+Hexadecimal: 009
+
+Decimal: 010
+Binary: 00001010
+Octal: 012
+Hexadecimal: 010
+
+Decimal: 011
+Binary: 00001011
+Octal: 013
+Hexadecimal: 011
+
+Decimal: 012
+Binary: 00001100
+Octal: 014
+Hexadecimal: 012
+
+Decimal: 013
+Binary: 00001101
+Octal: 015
+Hexadecimal: 013
+
+Decimal: 014
+Binary: 00001110
+Octal: 016
+Hexadecimal: 014
+
+Decimal: 015
+Binary: 00001111
+Octal: 017
+Hexadecimal: 015
+
+Decimal: 016
+Binary: 00010000
+Octal: 020
+Hexadecimal: 010
+
+Decimal: 017
+Binary: 00010001
+Octal: 021
+Hexadecimal: 011

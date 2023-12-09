@@ -1,0 +1,348 @@
+/*
+1. A string may be implemented, somewhat inefficiently, as a linked list.
+    (i) Write a function that reads a sequence of characters and builds such a list.
+    (ii) Write a function that takes such a list and prints the chracter string.
+    (iii) Write a function that takes two strings represented in this manner and returns the result of concatenating them.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    char ch;
+    struct Node *next;
+};
+
+struct LinkedList {
+    struct Node *head;
+};
+
+struct LinkedList *build_string();
+void print_string(struct LinkedList *str);
+struct LinkedList *concat(struct LinkedList *str1, struct LinkedList *str2);
+
+int main(void) {
+    print_string(concat(build_string(), build_string()));
+}
+
+struct LinkedList *build_string() {
+    struct LinkedList *string = malloc(sizeof(struct LinkedList)); // initalizes a LL and allocates memory for it
+
+    printf("Enter string: ");
+
+    char ch;
+    while((ch = getchar()) != '\n') { // takes in user input by each character; input is terminated when the newline character is entered
+        struct Node *curr = malloc(sizeof(struct Node)); // initializes a Node and allocates memory for it
+        curr->ch = ch; // assigns ch to the value of node curr
+        curr->next = NULL; // set curr->next as NULL for now
+
+        if(string->head == NULL) {
+            string->head = curr;
+        } else {
+            struct Node *temp = string->head;
+            while(temp->next != NULL) temp = temp->next; // traverses the list from head to tail and points temp to tail
+            temp->next = curr; // assign curr at tail->next
+        }
+    }
+
+    return string;
+}
+
+void print_string(struct LinkedList *str) {
+    struct Node *curr;
+    for(curr = str->head; curr != NULL; curr = curr->next) {
+        printf("%c", curr->ch);
+    }
+    printf("\n");
+}
+
+struct LinkedList *concat(struct LinkedList *str1, struct LinkedList *str2) {
+    struct LinkedList *res = malloc(sizeof(struct LinkedList));
+
+    if(str1 == NULL) return str2;
+    if(str2 == NULL) return str1;
+
+    struct Node *temp;
+    for(temp = str1->head; temp->next != NULL; temp = temp->next);
+    temp->next = str2->head;
+
+    res = str1;
+
+    return res;
+}
+
+./a5p1
+Enter string: abcde
+Enter string: fghij
+abcdefghij
+
+
+/*
+2. A doubly-linked list is one in which each node has three components:
+    (a) a pointer to the preceding node (except for the first node),
+    (b) some data, and
+    (c) a pointer to the next node (except for the last node).
+    The complete list itself has a single pointer pointing to the first item.
+
+    Write a program that
+    (i)     reads an integer N,
+    (ii)    reads N integers and enters them into a doubly-linked list, ensuring that the contents of the list are always in ascending order,
+    (iii)   and print the final list.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+    struct Node *prev;
+};
+
+struct LinkedList {
+    struct Node *head;
+};
+
+void print_list(struct LinkedList *list);
+void build_list();
+
+int main(void) {
+    build_list();
+}
+
+void print_list(struct LinkedList *list) {
+    struct Node *node = list->head;
+    for( ; node != NULL; node = node->next) {
+        printf("%d ", node->data);
+    }
+    printf("\n");
+}
+
+void build_list() {
+    struct LinkedList *list = malloc(sizeof(struct LinkedList));
+    list->head = NULL;
+
+    int n;
+    printf("Enter number of integers to enter: ");
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++) {
+        int val;
+        printf("Enter an integer: ");
+        scanf("%d", &val);
+
+        struct Node *curr = malloc(sizeof(struct Node));
+        curr->data = val;
+        curr->prev = NULL;
+        curr->next = NULL;
+
+        if(list->head == NULL || val <= list->head->data) {
+            curr->next = list->head; // link curr to head
+            if(list->head != NULL) { // if val is smaller than the value of the first element
+                list->head->prev = curr; // prepend curr to head
+            }
+            list->head = curr; // set curr as the new head
+        } else {
+            struct Node *temp = list->head; // temporary pointer to traverse the LL
+
+            while(temp->next != NULL && val >= temp->next->data) { // traverse the LL while it has a next element,
+                                                                    // and the value to be entered is >= but < than that of the next node
+                temp = temp->next;
+            }
+
+            curr->next = temp->next; // once the correct insertion index is found, link curr->next to temp->next
+
+            if(temp->next != NULL) {
+                temp->next->prev = curr; // if insertion occurs somewhere in the middle, link curr to (temp->next)->prev
+                                            // I like to imagine it as wedging curr between temp and temp->next.
+            }
+
+            curr->prev = temp; // establish bidirectional link between temp and curr
+            temp->next = curr;
+        }
+    }
+
+    print_list(list);
+
+    struct Node *del = list->head;
+    while(del != NULL) {
+        struct Node *temp = del;
+        del = del->next;
+        free(temp);
+    }
+    free(list);
+}
+
+./a5p2
+Enter number of integers to enter: 5
+Enter an integer: 1
+Enter an integer: 3
+Enter an integer: 5
+Enter an integer: 7
+Enter an integer: -10
+-10 1 3 5 7 
+
+
+/*
+3. A polynomial may be implemented as a linked list in which each node represents a term.
+    That is, each node consists of
+        (a) a data item that is the coefficient of the term,
+        (b) a data item that is the exponent, and
+        (c) a pointer to the next term.
+
+    (i) Write a function that, as arguments, takes a polynomial list and a term (i.e., coefficient value and exponent value) and adds the term to the polynomial.
+
+        If a term with the same exponent is already in the list, then it should be combined with the new one. For example, if the list already has the representation of 3x^2,
+        and the new term is 4x^2, then there should be a single entry, for 7x^2.
+
+    (ii) Write a function that builds a polynomial by repeatedly calling the function in (i). The arguments of the function should include the number of terms to be read.
+    (iii) Write a function that takes a polynomimal and a value for x, and returns the result of the evaluation of the polynomial.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Term {
+    int coeff;
+    int exp;
+    struct Term *next;
+};
+
+struct Polynomial {
+    struct Term *head;
+};
+
+void add_term(struct Polynomial *list, int coeff, int exp);
+struct Polynomial *build_polynomial(int num_terms);
+
+float eval(struct Polynomial *list, float x);
+float power(float x, int n); // helper function for eval
+
+void print_list(struct Polynomial *list); // for debugging purposes
+
+int main(void) {
+    int exp, coeff, num_terms;
+    float x;
+
+    printf("Enter number of terms: ");
+    scanf("%d", &num_terms);
+    printf("\n");
+
+    struct Polynomial *list = build_polynomial(num_terms);
+
+    print_list(list);
+
+    printf("Enter a value for x: ");
+    scanf("%f", &x);
+    printf("%f", eval(list, x));
+
+    struct Term *del = list->head;
+    while(del != NULL) {
+        struct Term *temp = del;
+        del = del->next;
+        free(temp);
+    }
+    free(list);
+
+    return 0;
+}
+
+void add_term(struct Polynomial *list, int coeff, int exp) {
+    struct Term *term = malloc(sizeof(struct Term));
+    term->coeff = coeff;
+    term->exp = exp;
+    term->next = NULL;
+
+    struct Term *curr = list->head;
+    if(list->head == NULL) {
+        list->head = term;
+    } else {
+        while(curr->next != NULL) {
+            if(term->exp == curr->exp) { // if a term with an identical exponent to that of an element in the list is encountered,
+                                            // add their coeffs and return.
+                (curr->coeff) += (term->coeff);
+                return;
+            }
+            curr = curr->next;
+        }
+        curr->next = term; // add term to the tail of the list
+    }
+}
+
+struct Polynomial *build_polynomial(int num_terms) {
+    struct Polynomial *list = malloc(sizeof(struct Polynomial));
+    list->head = NULL;
+
+    for(int i = 0; i < num_terms; i++) {
+        int coeff, exp;
+
+        printf("Enter the coefficient: ");
+        scanf("%d", &coeff);
+
+        printf("Enter the exponent: ");
+        scanf("%d", &exp);
+        printf("\n");
+
+        add_term(list, coeff, exp);
+    }
+
+    return list;
+}
+
+float eval(struct Polynomial *list, float x) {
+    float sum;
+    struct Term *curr = list->head;
+
+    while(curr != NULL) {
+        sum += ((curr->coeff) * power(x, curr->exp));
+        curr = curr->next;
+    }
+
+    return sum;
+}
+
+float power(float x, int n) {
+    if(x == 0.0f && n > 0) return 0.0f;
+    else if(x == 0.0f && n <= 0) EXIT_FAILURE;
+    else if(n == 0) return 1;
+    else if(n < 0) return 1.0f / (x * power(x, abs(n)-1));
+    return x * power(x, n-1);
+}
+
+void print_list(struct Polynomial *list) {
+    struct Term *term = list->head;
+
+    for( ; term != NULL; term = term->next) {
+        printf("Coefficient: %d\nExponent: %d\n\n", term->coeff, term->exp);
+    }
+}
+
+./a5p3
+Enter number of terms: 4
+
+Enter the coefficient: 3
+Enter the exponent: 2
+
+Enter the coefficient: -3
+Enter the exponent: 1
+
+Enter the coefficient: 1
+Enter the exponent: 0
+
+Enter the coefficient: 0
+Enter the exponent: 0
+
+Coefficient: 3
+Exponent: 2
+
+Coefficient: -3
+Exponent: 1
+
+Coefficient: 1
+Exponent: 0
+
+Coefficient: 0
+Exponent: 0
+
+Enter a value for x: 3
+19.000000%                              
+

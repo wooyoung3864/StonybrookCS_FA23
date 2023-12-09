@@ -1,0 +1,368 @@
+Wooyoung Jung 114744214- CSE220 Assignment 6
+
+# 1. Write a MIPS assembly-language program that does the following:
+#   (a) Reads an integer n
+#   (b) Reads n integers, one at a time.
+#   (c) Computes the sum of the positive integers and the sum of the negative integers.
+#   (d) Prints the results.
+
+.data
+        Init_prompt: .asciiz "\nEnter number of items to enter: "
+        Read_prompt: .asciiz "\nEnter an integer: "
+
+        Out_pos_sum: .asciiz "\nThe sum of the positive integers is: "
+        Out_neg_sum: .asciiz "\nThe sum of the negative integers is: "
+
+        NewLine: .asciiz "\n"
+
+.text
+main:
+        li $t0, 0               # int pos_sum = 0
+        li $t1, 0               # int neg_sum = 0
+        li $t2, 1               # int counter = 1
+
+        la $a0, Init_prompt     # load Init_prompt to $a0
+        li $v0, 4               # load syscode 4 (print string) to $v0
+        syscall                 # execute print statement
+
+        li $v0, 5               # load syscode 5 (read integer) to $v0
+        syscall                 # execute read statement
+        move $t3, $v0           # initialize int n with user input
+
+        blez $t3, continue       # do not read any inputs if n <= 0
+
+again:
+        la $a0, Read_prompt     # load Read_prompt to $a0
+        li $v0, 4               # load syscode 4 (print string) to $v0
+        syscall                 # execute print statement
+
+        li $v0, 5               # load syscode 5 (read integer) to $v0
+        syscall                 # execute read statement
+        move $t4, $v0           # initialize int input with user input
+
+        bltz $t4, add_neg       # if (input < 0) neg_sum += input
+        bgez $t4, add_pos       # if (input >= 0) pos_sum += input
+
+        j continue 
+
+add_neg:
+        add $t1, $t1, $t4       # neg_sum += input
+        j increment
+
+add_pos:
+        add $t0, $t0, $t4       # pos_sum += input
+        j increment
+
+increment:
+        addi $t2, $t2, 1        # add immediate 1 to counter (counter++)
+        ble $t2, $t3, again     # branch less than or equal counter, n, again
+
+continue:
+        la $a0, Out_pos_sum     # load Out_pos_sum to $a0
+        li $v0, 4               # load syscode 4 (print string) to $v0
+        syscall                 # execute print statement
+
+        li $v0, 1               # load syscode 1 (print integer) to $v0
+        move $a0, $t0           # move pos_sum to $a0 for output
+        syscall                 # execute print statement
+
+        la $a0, Out_neg_sum     # load Out_neg_sum to $a0
+        li $v0, 4               # load syscode 4 (print string) to $v0
+        syscall                 # execute print statement
+
+        li $v0, 1               # load syscode 1 (print integer) to $v0
+        move $a0, $t1           # move neg_sum to $a0 for output
+        syscall                 # execute print statement
+
+        la $a0, NewLine         # load NewLine to $a0
+        li $v0, 4               # load "print string" code to $v0
+        syscall                 # execute print statement
+
+        li $v0, 10              # load syscode 10 (terminate execution) to $v0
+        syscall                 # terminate execution
+
+
+Enter number of items to enter: 5
+
+Enter an integer: 2
+
+Enter an integer: 1
+
+Enter an integer: 6
+
+Enter an integer: -9
+
+Enter an integer: -6
+
+The sum of the positive integers is: 9
+The sum of the negative integers is: -15
+
+
+# 2. Write a MIPS assembly-language program that does the following:
+#       (a) Reads two integers, a dividend and divisor.
+#       (b) Divides the two using only repeated subtraction.
+#       (c) Prints the quotient and remainder from the division.
+
+.data
+        In_dividend: .asciiz "\nEnter dividend: "
+        In_divisor: .asciiz "\nEnter divisor: "
+
+        Out_quotient: .asciiz "\nThe quotient is: "
+        Out_remainder: .asciiz "\nThe remainder is: "
+
+        Div_by_zero: .asciiz "\nError: division by zero!"
+
+        New_line: .asciiz "\n"
+
+.text
+main:
+        la $a0, In_dividend
+        li $v0, 4
+        syscall                 # print In_dividend
+        li $v0, 5
+        syscall                 # read dividend
+        move $t0, $v0           # store dividend in $t0
+
+        la $a0, In_divisor
+        li $v0, 4
+        syscall                 # print In_divisor
+        li $v0, 5               
+        syscall                 # read divisor
+        move $t1, $v0           # store divisor in $t1
+
+        li $t3, 0               # int counter = 0 in $t3
+
+        li $t4, 0               # dividend_sign = 0 (positive by default)
+        li $t5, 0               # divisor_sign = 0 (positive by default)
+
+        beq $t1, $zero, div_by_zero    # handle division by zero
+        beq $t0, $zero, result  # print 0 and 0 if dividend is zero
+
+        bltz $t0, flip_dividend    # flip sign of dividend if it is negative
+        bltz $t1, flip_divisor      # flip sign of divisor if it is negative
+        blt $t0, $t1, blt_dividend_divisor  # if dividend < divisor, send to special case
+
+        j default               # jump to default case if both inputs are positive
+
+div_by_zero:
+        la $a0, Div_by_zero
+        li $v0, 4
+        syscall
+
+        j exit 
+
+flip_dividend:
+        sub $t0, $zero, $t0       # dividend = 0 - dividend
+        li $t4, 1               # dividend_sign = 1 if negative, 0 if positive
+        bltz $t1, flip_divisor      # flip sign of divisor if it is negative
+        blt $t0, $t1, blt_dividend_divisor  # if dividend < divisor, send to special case
+        j default               # jump to default case otherwise
+
+flip_divisor:
+        sub $t1, $zero, $t1       # divisor = 0 - divisor
+        li $t5, 1               # divisor_sign = 1 if negative, 0 if positive
+        blt $t0, $t1, blt_dividend_divisor  # if dividend < divisor, send to special case
+
+default:
+        sub $t0, $t0, $t1       # dividend -= divisor
+        addi $t3, $t3, 1        # counter++
+        bge $t0, $t1, default   # while (dividend >= divisor)
+        j result
+
+blt_dividend_divisor:
+        li $t3, 0               # set quotient to 0
+        blez $t4, print_result  # if dividend is positive, results will be positive
+        bgtz $t4, flip_both     # if dividend is negative, make remainder negative
+
+result:
+    bgtz $t5, flip_quotient     # if divisor is negative, make quotient negative
+    bgtz $t4, flip_both         # if dividend is negative, make both quotient and remainder negative
+
+    j print_result              # jump to print if dividend and divisor are positive
+
+flip_quotient:
+    bgtz $t4, print_result      # if both dividend and divisor are negative, results will be positive
+    sub $t3, $zero, $t3           # quotient = 0 - quotient
+    j print_result
+
+flip_both:
+    sub $t3, $zero, $t3           # quotient = 0 - quotient
+    sub $t0, $zero, $t0           # remainder = 0 - remainder
+
+print_result:
+        la $a0, Out_quotient
+        li $v0, 4
+        syscall             # print Out_quotient
+        li $v0, 1
+        move $a0, $t3
+        syscall             # print quotient
+
+        la $a0, Out_remainder
+        li $v0, 4
+        syscall             # print Out_remainder
+        li $v0, 1
+        move $a0, $t0
+        syscall             # print remainder
+
+exit:
+        la $a0, New_line     
+        li $v0, 4
+        syscall             # print newline character    
+
+        li $v0, 10              # load syscode 10 (terminate execution) to $v0
+        syscall                 # terminate execution
+
+
+Enter dividend: -2
+Enter divisor: 7
+
+The quotient is: 0
+The remainder is: -2
+
+Enter dividend: -2
+Enter divisor: -7
+
+The quotient is: 0
+The remainder is: -2
+
+Enter dividend: 1
+
+Enter divisor: -1
+
+The quotient is: -1
+The remainder is: 0
+
+Enter dividend: -1
+
+Enter divisor: -1
+
+The quotient is: 1
+The remainder is: 0
+
+Enter dividend: 0
+
+Enter divisor: 78
+
+The quotient is: 0
+The remainder is: 0
+
+Enter dividend: 0
+
+Enter divisor: 0
+
+Error: division by zero!
+
+Enter dividend: 72
+
+Enter divisor: 2
+
+The quotient is: 36
+The remainder is: 0
+
+Enter dividend: 7
+
+Enter divisor: -2
+
+The quotient is: -3
+The remainder is: 1
+
+
+# 3. Write a MIPS assembly-language program that reads an integer N and prints an asterisk-pyramid of N lines. 
+#    For example, if N is 4, then the output should be
+#     *        
+#    ***
+#   *****     
+#  ******* .
+
+.data
+        asterisk: .asciiz "*"
+        space: .asciiz " "
+        new_line: .asciiz "\n"
+        prompt: .asciiz "\nEnter a positive integer n: "
+
+.text
+.globl main
+
+main:
+        li $t0, 1       # int i = 1
+
+        la $a0, prompt
+        li $v0, 4
+        syscall         # print prompt
+
+        li $v0, 5       # load syscode 5 (read integer) into $v0
+        syscall         # read input
+        move $t1, $v0   # int n = input
+
+        la $a0, new_line
+        li $v0, 4
+        syscall         # print newline character
+
+        move $t3, $t1   # int m = n
+        addi $t3, $t3, -1 # m = m-1
+
+        move $t4, $t1   # int k = n
+
+outer_loop:
+        li $t2, 1                       # int j = 1
+
+        inner_loop:
+            bgt $t2, $t3, print_ast     # if(j > m)
+            j print_space
+
+            print_ast: 
+                la $a0, asterisk
+                j continue
+
+            print_space:
+                la $a0, space
+
+            continue:
+                li $v0, 4
+                syscall
+
+                addi $t2, $t2, 1    # j++
+        ble $t2, $t4, inner_loop    # while(j <= k)
+
+        addi $t3, $t3, -1           # m--
+        addi $t4, $t4, 1            # k++
+
+        la $a0, new_line
+        li $v0, 4               
+        syscall                     # print newline character
+
+        addi $t0, $t0, 1            #i++
+        ble $t0, $t1, outer_loop    # while i <= n
+
+        li $v0, 10
+        syscall                     # terminate execution
+
+
+Enter a positive integer: 4
+
+   *
+  ***
+ *****
+*******
+
+Enter a positive integer: 5
+
+    *
+   ***
+  *****
+ *******
+*********
+
+Enter a positive integer: 10
+
+         *
+        ***
+       *****
+      *******
+     *********
+    ***********
+   *************
+  ***************
+ *****************
+*******************
+
